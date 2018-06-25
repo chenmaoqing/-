@@ -1,8 +1,11 @@
 # 下载项目
 	#拉取远程项目，将本地ssh-key放入远程GitHub的ssh秘钥管理
 	然后通过下面的命令拉取远程项目，以后再进行代码提交的时候就可以免密码提交代码了
-	git init  
+	git init
 	git clone  ssh://git@github.com/chenmaoqing/chenmaoqing.git
+	cd chenmaoqing
+	git pull    #就可以将远程最新代码拉取到本地
+	
 # git 上传更新代码步骤
 	- git pull   #先拉取最新代码
 	- 将自己的写好的代码放入到相应的文件夹下，比如op/issues
