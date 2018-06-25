@@ -1,0 +1,5 @@
+useradd  user1
+passwd   user1
+usermod -aG docker user1
+gpasswd -a user1 wheel
+passwd  -e user1
