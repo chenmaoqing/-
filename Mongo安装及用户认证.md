@@ -153,3 +153,90 @@ sudo yum install -y mongodb-enterprise  #安装最新mongo，默认会依赖安�
 	> show collections
 	stu
 
+超管密码忘记，更改密码步骤：
+
+1、更改配置文件，将auth=true注释掉，或者true改为false
+
+2、重启mongo
+
+	pkill -9 mongo  
+	./bin/mongod -f conf/mongodb.conf
+	./bin/mongo
+	>use admin
+	> db.system.users.find()  #查找admin用户
+	> db.system.users.remove({'_id':'data.admin'}) #根据id将admin用户删除，然后重新建admin
+	> 
+	> db.createUser(
+		... ... {
+		... ...    user:"admin",
+		... ...    pwd:"admin123",
+		... ...    roles:[ { role:"userAdminAnyDatabase",db:"admin"}]
+		... ... } )
+	db.createUser({ user:"admin",pwd:"admin123", roles:[{role:"userAdminAnyDatabase",db:"admin"}]})
+
+
+3、再次kill掉mongo，将auth改为true后进行重启
+	
+## mongo数据库Role ##
+	
+	Built-In Roles（内置角色）：
+	1. 数据库用户角色：read、readWrite;
+	2. 数据库管理角色：dbAdmin、dbOwner、userAdmin；
+	3. 集群管理角色：clusterAdmin、clusterManager、clusterMonitor、hostManager；
+	4. 备份恢复角色：backup、restore；
+	5. 所有数据库角色：readAnyDatabase、readWriteAnyDatabase、userAdminAnyDatabase、dbAdminAnyDatabase
+	6. 超级用户角色：root  
+	// 这里还有几个角色间接或直接提供了系统超级用户的访问（dbOwner 、userAdmin、userAdminAnyDatabase）
+	7. 内部角色：__system
+
+	Read：允许用户读取指定数据库
+	readWrite：允许用户读写指定数据库
+	dbAdmin：允许用户在指定数据库中执行管理函数，如索引创建、删除，查看统计或访问system.profile
+	userAdmin：允许用户向system.users集合写入，可以找指定数据库里创建、删除和管理用户
+	clusterAdmin：只在admin数据库中可用，赋予用户所有分片和复制集相关函数的管理权限。
+	readAnyDatabase：只在admin数据库中可用，赋予用户所有数据库的读权限
+	readWriteAnyDatabase：只在admin数据库中可用，赋予用户所有数据库的读写权限
+	userAdminAnyDatabase：只在admin数据库中可用，赋予用户所有数据库的userAdmin权限
+	dbAdminAnyDatabase：只在admin数据库中可用，赋予用户所有数据库的dbAdmin权限。
+	root：只在admin数据库中可用。超级账号，超级权限
+
+	userAdminAnyDatabase 权限只是针对用户管理的，对其他是没有权限的。
+	mongodump --port=27020 -uzjyr -pzjyr --db=test -o backup   
+	#只要读权限就可以备份
+	mongorestore --port=27020 -uzjy -pzjy --db=test backup/test/  
+	#读写权限可以进行还原
+
+
+	更新用户密码
+		use xx
+		db.changeUserPassword("username","newpassword")
+
+	删除用户
+		切换到用户授权的db
+		use xx
+		执行删除操作
+		db.dropUser("username")
+	更新用户
+		切换到用户授权的db
+		use xx
+		执行更新
+		字段会覆盖原来的内容
+
+		db.updateUser("username",{
+		    pwd:"new password",
+		    customData:{
+		        "title":"PHP developer"
+		    }
+		})
+
+	查看角色信息
+		use admin
+		db.getRole("rolename",{showPrivileges:true})
+	
+	删除角色
+		use admin
+		db.dropRole("rolename")更新用户密码
+
+	查看用户信息
+		use admin
+		db.getUser("username")
